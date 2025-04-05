@@ -2,7 +2,6 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from matplotlib.lines import Line2D
 
 from matplotlib.widgets import Button, Slider
 
@@ -152,6 +151,7 @@ prediction = plt.Circle([0, 0], 0, color="green", fill=True, clip_on=False)
 prediction.set_radius(2)
 ax.add_artist(prediction)
 
+
 # main
 def animate(_):
     global tick
@@ -191,6 +191,37 @@ def animate(_):
             ball.nx, ball.ny = pred_x, pred_y
             ball.angle = rebound
             ball.delay_log = True
+
+        # # ball hits borders
+        # if abs(50 - ball.nx) > 50 - ball.radius:
+        #     # horizontal
+        #     if ball.nx > 50:
+        #         ball.nx, ball.ny = calc_snap_pos(
+        #             ball.angle, ball.nx, ball.ny, -ball.radius, 1000, 100, 0
+        #         )
+        #         ball.nx = min(ball.nx, 99 - ball.radius)
+        #     else:
+        #         ball.nx, ball.ny = calc_snap_pos(
+        #             ball.angle, ball.nx, ball.ny, ball.radius, 1000, 0, 0
+        #         )
+        #         ball.nx = max(ball.nx, ball.radius + 1)
+        #     # real reflections
+        #     ball.angle = math.pi - ball.angle
+        # if abs(50 - ball.ny) > 50 - ball.radius:
+        #     # vertical
+        #     if ball.ny > 50:
+        #         ball.nx, ball.ny = calc_snap_pos(
+        #             ball.angle, ball.nx, ball.ny, ball.radius, 0, 0, 100
+        #         )
+        #         ball.ny = min(ball.ny, 99 - ball.radius)
+        #     else:
+        #         ball.nx, ball.ny = calc_snap_pos(
+        #             ball.angle, ball.nx, ball.ny, -ball.radius, 0, 0, 0
+        #         )
+        #         ball.ny = max(ball.ny, ball.radius + 1)
+
+        #     # real reflections
+        #     ball.angle = -ball.angle
     tick += 1
 
 
@@ -204,8 +235,6 @@ def start(event):
         ball.remove()
 
     vis_ball.b.set_visible(False)
-    pred_line.set_visible(False)
-
 
     sack_of_balls = [
         Ball(ball_xpos, ball_ypos, ball_radius, ball_velocity, ball_angle, "black")
@@ -244,25 +273,11 @@ def update(event):
     ball_xpos = xpos_slider.val
     ball_ypos = ypos_slider.val
     vis_ball = Ball(ball_xpos, ball_ypos, ball_radius, ball_velocity, ball_angle, "red")
-    put_pred_line(False)
 
-def put_pred_line(first):
-    global pred_line
-
-    pred_pose = (ball_xpos + math.cos(ball_angle) * ball_velocity * ball_radius,
-                 ball_ypos + math.sin(ball_angle) * ball_velocity * ball_radius)
-    if (not first):
-        pred_line.remove()
-    pred_line = Line2D([ball_xpos, pred_pose[0]], [ball_ypos, pred_pose[1]],
-                       color="red", linewidth=ball_radius * 2,)
-
-    ax.add_artist(pred_line)
 
 vis_ball = Ball(
     DEFAULT_XPOS, DEFAULT_YPOS, DEFAULT_RADIUS, DEFAULT_VEL, DEFAULT_ANGLE, "red"
 )
-pred_line = None
-put_pred_line(True)
 
 button.on_clicked(start)
 radius_slider.on_changed(update)
