@@ -35,15 +35,13 @@ class Ball:
 
 sack_of_balls = [
     Ball(95, 1, 1, 2, math.pi / 2.2),
-    Ball(95, 1, 1, 0.01, math.pi / 1.5),
+    Ball(95, 1, 1, 1, math.pi / 1.5),
     Ball(0, 0, 25, 2, math.pi / 4),
 ]
 
 # define balls trails
 trails = []
 scat = ax.scatter([], [], s=10)
-
-# define borders
 
 
 # calculate the snap position between two lines while snapping with a given radius

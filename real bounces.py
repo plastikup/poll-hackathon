@@ -146,43 +146,14 @@ def animate(_):
     for ball in sack_of_balls:
         if tick % 5 == 0:
             trails.append(ball.b.center)
-            if len(trails) > 300:
-                trails.pop(0)
+        if len(trails) > 300:
+            trails.pop(0)
             scat.set_offsets(trails)
 
         # cinematics
         ball.b.center = ball.nx, ball.ny
         ball.nx += ball.velocity * math.cos(ball.angle)
         ball.ny += ball.velocity * math.sin(ball.angle)
-
-        # ball hits balls
-        for iball in sack_of_balls:
-            if iball == ball:
-                continue
-            dist = math.sqrt((ball.nx - iball.nx) ** 2 + (ball.ny - iball.ny) ** 2)
-            if dist < ball.radius + iball.radius:
-                multpl = 1.5
-
-                displacement = (ball.radius + iball.radius) - dist
-                angle_to_iball = math.atan2(ball.ny - iball.ny, ball.nx - iball.nx)
-
-                x_displ = displacement / 2 * math.cos(angle_to_iball)
-                y_displ = displacement / 2 * math.sin(angle_to_iball)
-                ball.nx += x_displ
-                ball.ny += y_displ
-                ball.angle = math.atan2(
-                    math.sin(ball.angle) + y_displ * multpl,
-                    math.cos(ball.angle) + x_displ * multpl,
-                )
-
-                ix_displ = displacement / -2 * math.cos(angle_to_iball)
-                iy_displ = displacement / -2 * math.sin(angle_to_iball)
-                iball.nx += ix_displ
-                iball.ny += iy_displ
-                iball.angle = math.atan2(
-                    math.sin(iball.angle) + iy_displ * multpl,
-                    math.cos(iball.angle) + ix_displ * multpl,
-                )
 
         # ball hits borders
         if abs(50 - ball.nx) > 50 - ball.radius:
