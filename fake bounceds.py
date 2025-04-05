@@ -15,14 +15,12 @@ ax.set_yticks([])
 ax.set_aspect("equal")
 
 
-# define trails
-trails = []
-scat = ax.scatter([], [], s=10)
-
-
 # define balls yay
 class Ball:
     def __init__(self, x, y, r, v, a):
+        x = min(max(x, r), 100 - r)
+        y = min(max(y, r), 100 - r)
+
         self.radius = r
         self.velocity = v
         self.angle = a
@@ -35,9 +33,20 @@ class Ball:
         ax.add_artist(self.b)
 
 
-sack_of_balls = [Ball(95, 1, 1, 2, math.pi / 2.2), Ball(95, 1, 1, 2, math.pi / 1.5)]
+sack_of_balls = [
+    Ball(95, 1, 1, 2, math.pi / 2.2),
+    Ball(95, 1, 1, 0.01, math.pi / 1.5),
+    Ball(0, 0, 25, 2, math.pi / 4),
+]
+
+# define balls trails
+trails = []
+scat = ax.scatter([], [], s=10)
+
+# define borders
 
 
+# calculate the snap position between two lines while snapping with a given radius
 def calc_snap_pos(ball_a, ball_nx, ball_ny, ball_r, wall_a, wall_x, wall_y):
     rc = wall_y - ball_r * math.sqrt(wall_a**2 + 1)
     _x = (wall_a * wall_x - math.tan(ball_a) * ball_nx + ball_ny - rc) / (
@@ -47,12 +56,15 @@ def calc_snap_pos(ball_a, ball_nx, ball_ny, ball_r, wall_a, wall_x, wall_y):
     return _x, _y
 
 
+# main
 def animate(_):
     global tick
 
     for ball in sack_of_balls:
-        if tick % 4 == 0:
+        if tick % 5 == 0:
             trails.append(ball.b.center)
+            if len(trails) > 300:
+                trails.pop(0)
             scat.set_offsets(trails)
 
         # cinematics
@@ -64,12 +76,6 @@ def animate(_):
         sign = math.cos(ball.angle) * math.sin(ball.angle)
         if abs(50 - ball.nx) > 50 - ball.radius:
             # horizontal
-            # x_dist = (
-            #     ball.nx - 100 + ball.radius if ball.nx > 50 else -ball.nx - ball.radius
-            # )
-            # ball.nx -= x_dist
-            # ball.ny += x_dist * math.tan(ball.angle)
-            # print(-x_dist, x_dist * math.tan(ball.angle), ball.angle)
             if ball.nx > 50:
                 ball.nx, ball.ny = calc_snap_pos(
                     ball.angle, ball.nx, ball.ny, -ball.radius, 1000, 100, 0
@@ -82,11 +88,6 @@ def animate(_):
             ball.angle += math.pi / 2 * math.copysign(1, sign)
         if abs(50 - ball.ny) > 50 - ball.radius:
             # vertical
-            # y_dist = (
-            #     ball.ny - 100 + ball.radius if ball.ny > 50 else -ball.ny - ball.radius
-            # )
-            # ball.nx += y_dist / math.tan(ball.angle)
-            # ball.ny -= y_dist
             if ball.ny > 50:
                 ball.nx, ball.ny = calc_snap_pos(
                     ball.angle, ball.nx, ball.ny, ball.radius, 0, 0, 100
@@ -101,6 +102,7 @@ def animate(_):
     tick += 1
 
 
+# kickstart our masterpiece!! :D
 ani = animation.FuncAnimation(
     fig,
     animate,
