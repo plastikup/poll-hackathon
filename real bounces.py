@@ -3,16 +3,48 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
+from matplotlib.widgets import Button, Slider
+
 tick = 0
+DEFAULT_RADIUS = 1
+DEFAULT_VEL = 2
+DEFAULT_ANGLE = math.pi / 6
+
 
 # figure setup
-fig = plt.figure(figsize=(8, 8))
-ax = fig.add_axes([0.1, 0.1, 0.8, 0.8], frameon=True)
+fig = plt.figure(figsize=(12, 8))
+ax = fig.add_axes([0.0, 0.1, 0.8, 0.8], frameon=True)
 ax.set_xlim(0, 100)
 ax.set_xticks([])
 ax.set_ylim(0, 100)
 ax.set_yticks([])
 ax.set_aspect("equal")
+
+button_ax = fig.add_axes([0.8, 0.02, 0.15, 0.05])
+button = Button(button_ax, "Start", color="0.9" ,hovercolor="0.8")
+
+# nballs_ax = fig.add_axes([0.8, 0.85, 0.15, 0.05])
+# nballs_slider = Slider(nballs_ax, "Radius", 1, 10, valinit=1, valstep=1)
+
+radius_ax = fig.add_axes([0.8, 0.85, 0.15, 0.05])
+radius_slider = Slider(radius_ax, "Radius", 0.5, 10, valinit=DEFAULT_RADIUS, valstep=0.5)
+
+velocity_ax = fig.add_axes([0.8, 0.75, 0.15, 0.05])
+velocity_slider = Slider(velocity_ax, "Velocity", 0.1, 5, valinit=DEFAULT_VEL, valstep=0.1)
+
+angle_ax = fig.add_axes([0.8, 0.65, 0.15, 0.05])
+angle_slider = Slider(angle_ax, "Angle (rad)", 0, 2 * math.pi, valinit=DEFAULT_ANGLE)
+
+sack_of_balls = []
+
+# define balls trails
+trails = []
+scat = ax.scatter([], [], s=10)
+
+ani = None
+ball_radius = DEFAULT_RADIUS
+ball_velocity = DEFAULT_VEL
+ball_angle = DEFAULT_ANGLE
 
 
 # define balls yay
@@ -31,20 +63,8 @@ class Ball:
         self.b = plt.Circle([x, y], 0, color="black", fill=True, clip_on=False)
         self.b.set_radius(r)
         ax.add_artist(self.b)
-
-
-sack_of_balls = [
-    Ball(95, 1, 1, 2, math.pi / 2.2),
-    Ball(95, 1, 1, 4, math.pi / 1.5),
-    Ball(0, 0, 25, 2, math.pi / 4),
-]
-
-# define balls trails
-trails = []
-scat = ax.scatter([], [], s=10)
-
-# define borders
-
+    def remove(self):
+        self.b.remove()
 
 # calculate the snap position between two lines while snapping with a given radius
 def calc_snap_pos(ball_a, ball_nx, ball_ny, ball_r, wall_a, wall_x, wall_y):
@@ -86,7 +106,6 @@ def animate(_):
                 )
             # real reflections
             ball.angle = math.pi - ball.angle
-            print(ball.angle)
         if abs(50 - ball.ny) > 50 - ball.radius:
             # vertical
             if ball.ny > 50:
@@ -102,14 +121,43 @@ def animate(_):
 
     tick += 1
 
-
 # kickstart our masterpiece!! :D
-ani = animation.FuncAnimation(
+def start(event):
+    global ani
+    global sack_of_balls
+    global trails
+
+    for ball in sack_of_balls:
+        ball.remove()
+
+    sack_of_balls = [Ball(50, 50, ball_radius, ball_velocity, ball_angle)]
+    print(ball_velocity)
+    trails = []
+
+
+    ani = animation.FuncAnimation(
     fig,
     animate,
     np.arange(0.4, 2, 0.1),
     init_func=(lambda: scat.set_facecolors((0, 0, 0, 1)))(),
     interval=16,
-    blit=False,
-)
+    blit=False)
+
+    plt.show()
+
+def update(event):
+    global ball_radius
+    global ball_velocity
+    global ball_angle
+
+    ball_radius = radius_slider.val
+    ball_velocity = velocity_slider.val
+    ball_angle = angle_slider.val
+
+
+button.on_clicked(start)
+radius_slider.on_changed(update)
+velocity_slider.on_changed(update)
+angle_slider.on_changed(update)
+
 plt.show()
