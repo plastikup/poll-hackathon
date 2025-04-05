@@ -15,12 +15,21 @@ DEFAULT_YPOS = 50
 
 # figure setup
 fig = plt.figure(figsize=(12, 8))
-ax = fig.add_axes([0.0, 0.1, 0.8, 0.8], frameon=True)
+ax = fig.add_axes([0.0, 0.1, 0.8, 0.8], frameon=False)
 ax.set_xlim(0, 100)
 ax.set_xticks([])
 ax.set_ylim(0, 100)
 ax.set_yticks([])
 ax.set_aspect("equal")
+
+
+polygon = [[20, 20], [20, 80], [80, 80], [80, 20]]
+ax.plot(
+    list(map(lambda e: e[0], polygon + [polygon[0]])),
+    list(map(lambda e: e[1], polygon + [polygon[0]])),
+    "black",
+)
+
 
 button_ax = fig.add_axes([0.775, 0.1, 0.15, 0.05])
 button = Button(button_ax, "Start", color="0.9", hovercolor="0.8")
@@ -75,60 +84,54 @@ class Ball:
         self.b.set_radius(r)
         ax.add_artist(self.b)
 
+        self.ox = x
+        self.oy = y
+
     def remove(self):
         self.b.remove()
 
 
-# sack_of_balls = [
-#     Ball(95, 1, 5, 1, math.pi / 2.2),
-#     Ball(80, 20, 5, 2, math.pi),
-#     Ball(40, 1, 5, 2, math.pi / 1.5),
-#     Ball(0, 0, 10, 1, math.pi / 4),
-#     Ball(95, 1, 5, 1, math.pi / 2.2),
-#     Ball(80, 20, 5, 2, math.pi),
-#     Ball(40, 1, 5, 2, math.pi / 1.5),
-#     Ball(0, 0, 10, 1, math.pi / 4),
-#     Ball(95, 1, 5, 1, math.pi / 2.2),
-#     Ball(80, 20, 5, 2, math.pi),
-#     Ball(40, 1, 5, 2, math.pi / 1.5),
-#     Ball(0, 0, 10, 1, math.pi / 4),
-#     Ball(95, 1, 5, 1, math.pi / 2.2),
-#     Ball(80, 20, 5, 2, math.pi),
-#     Ball(40, 1, 5, 2, math.pi / 1.5),
-#     Ball(0, 0, 10, 1, math.pi / 4),
-#     Ball(95, 1, 5, 1, math.pi / 2.2),
-#     Ball(80, 20, 5, 2, math.pi),
-#     Ball(40, 1, 5, 2, math.pi / 1.5),
-#     Ball(0, 0, 10, 1, math.pi / 4),
-#     Ball(95, 1, 5, 1, math.pi / 2.2),
-#     Ball(80, 20, 5, 2, math.pi),
-#     Ball(40, 1, 5, 2, math.pi / 1.5),
-#     Ball(0, 0, 10, 1, math.pi / 4),
-#     Ball(95, 1, 5, 1, math.pi / 2.2),
-#     Ball(80, 20, 5, 2, math.pi),
-#     Ball(40, 1, 5, 2, math.pi / 1.5),
-#     Ball(0, 0, 10, 1, math.pi / 4),
-#     Ball(95, 1, 5, 1, math.pi / 2.2),
-#     Ball(80, 20, 5, 2, math.pi),
-#     Ball(40, 1, 5, 2, math.pi / 1.5),
-#     Ball(0, 0, 10, 1, math.pi / 4),
-#     Ball(95, 1, 5, 1, math.pi / 2.2),
-#     Ball(80, 20, 5, 2, math.pi),
-#     Ball(40, 1, 5, 2, math.pi / 1.5),
-#     Ball(0, 0, 10, 1, math.pi / 4),
-#     Ball(95, 1, 5, 1, math.pi / 2.2),
-#     Ball(80, 20, 5, 2, math.pi),
-#     Ball(40, 1, 5, 2, math.pi / 1.5),
-#     Ball(0, 0, 10, 1, math.pi / 4),
-#     Ball(95, 1, 5, 1, math.pi / 2.2),
-#     Ball(80, 20, 5, 2, math.pi),
-#     Ball(40, 1, 5, 2, math.pi / 1.5),
-#     Ball(0, 0, 10, 1, math.pi / 4),
-#     Ball(95, 1, 5, 1, math.pi / 2.2),
-#     Ball(80, 20, 5, 2, math.pi),
-#     Ball(40, 1, 5, 2, math.pi / 1.5),
-#     Ball(0, 0, 10, 1, math.pi / 4),
-# ]
+def calc_next_point(corner_list, x_pos, y_pos, angle, v):
+    vx = v * math.cos(angle)
+    vy = v * math.sin(angle)
+    for i in range(len(corner_list)):
+        x1, y1 = corner_list[i - 1]
+        x2, y2 = corner_list[i]
+
+        # Déterminant de la matrice d'équations
+        det = ((x2 - x1) * vy) - ((y2 - y1) * vx)
+        t = ((x_pos - x1) * vy - (y_pos - y1) * vx) / det
+        s = ((x_pos - x1) * (y2 - y1) - (y_pos - y1) * (x2 - x1)) / det
+
+        # x_point, y_point = x_pos + t*math.cos(angle), y_pos + t*math.sin(angle)
+        x_point = x1 + ((((x_pos - x1) * vy) - ((y_pos - y1) * vx)) / det) * (x2 - x1)
+        y_point = y1 + ((((x_pos - x1) * vy) - ((y_pos - y1) * vx)) / det) * (y2 - y1)
+
+        if 0 <= t <= 1 and s >= 0:
+            return (
+                x_point,
+                y_point,
+                2 * math.atan2(y2 - y1, x2 - x1) - angle,
+                v,
+            )
+
+
+def calc_n_bounce(corner_list, x_pos, y_pos, angle, v, n):
+    if n == 0:
+        return []
+    else:
+        # Appel à calc_next_point
+        new_x, new_y, new_angle, new_v = calc_next_point(
+            corner_list, x_pos, y_pos, angle, v
+        )
+
+        # Résultat courant
+        current = (new_x, new_y, new_angle, new_v)
+
+        # Appel récursif
+        rest = calc_n_bounce(corner_list, new_x, new_y, new_angle, new_v, n - 1)
+
+        return [current] + rest
 
 
 # calculate the snap position between two lines while snapping with a given radius
@@ -142,11 +145,34 @@ def calc_snap_pos(ball_a, ball_nx, ball_ny, ball_r, wall_a, wall_x, wall_y):
     return _x, _y
 
 
+prediction = plt.Circle([0, 0], 0, color="green", fill=True, clip_on=False)
+prediction.set_radius(2)
+ax.add_artist(prediction)
+
+
 # main
 def animate(_):
     global tick
 
     for ball in sack_of_balls:
+        # pred_x, pred_y, rebound, _ = calc_next_point(
+        #     polygon,
+        #     xpos_slider.val,
+        #     ypos_slider.val,
+        #     angle_slider.val,
+        #     velocity_slider.val,
+        # )
+        pred_x, pred_y, rebound, _ = calc_next_point(
+            polygon,
+            ball.ox,
+            ball.oy,
+            ball.angle,
+            ball.velocity,
+        )
+        prediction.center = [pred_x, pred_y]
+        print(ball.ox, ball.angle)
+        print(pred_x, pred_y)
+
         if tick % 5 == 0:
             trails.append(ball.b.center)
         if len(trails) > 300:
@@ -158,37 +184,46 @@ def animate(_):
         ball.nx += ball.velocity * math.cos(ball.angle)
         ball.ny += ball.velocity * math.sin(ball.angle)
 
-        # ball hits borders
-        if abs(50 - ball.nx) > 50 - ball.radius:
-            # horizontal
-            if ball.nx > 50:
-                ball.nx, ball.ny = calc_snap_pos(
-                    ball.angle, ball.nx, ball.ny, -ball.radius, 1000, 100, 0
-                )
-                ball.nx = min(ball.nx, 99 - ball.radius)
-            else:
-                ball.nx, ball.ny = calc_snap_pos(
-                    ball.angle, ball.nx, ball.ny, ball.radius, 1000, 0, 0
-                )
-                ball.nx = max(ball.nx, ball.radius + 1)
-            # real reflections
-            ball.angle = math.pi - ball.angle
-        if abs(50 - ball.ny) > 50 - ball.radius:
-            # vertical
-            if ball.ny > 50:
-                ball.nx, ball.ny = calc_snap_pos(
-                    ball.angle, ball.nx, ball.ny, ball.radius, 0, 0, 100
-                )
-                ball.ny = min(ball.ny, 99 - ball.radius)
-            else:
-                ball.nx, ball.ny = calc_snap_pos(
-                    ball.angle, ball.nx, ball.ny, -ball.radius, 0, 0, 0
-                )
-                ball.ny = max(ball.ny, ball.radius + 1)
+        # collision with border
+        if (
+            min(ball.b.center[0], ball.nx) < pred_x < max(ball.b.center[0], ball.nx)
+        ) and (
+            min(ball.b.center[1], ball.ny) < pred_y < max(ball.b.center[1], ball.ny)
+        ):
+            ball.nx, ball.ny = pred_x, pred_y
+            ball.angle = rebound
+            ball.ox, ball.oy = ball.nx, ball.ny
 
-            # real reflections
-            ball.angle = -ball.angle
+        # # ball hits borders
+        # if abs(50 - ball.nx) > 50 - ball.radius:
+        #     # horizontal
+        #     if ball.nx > 50:
+        #         ball.nx, ball.ny = calc_snap_pos(
+        #             ball.angle, ball.nx, ball.ny, -ball.radius, 1000, 100, 0
+        #         )
+        #         ball.nx = min(ball.nx, 99 - ball.radius)
+        #     else:
+        #         ball.nx, ball.ny = calc_snap_pos(
+        #             ball.angle, ball.nx, ball.ny, ball.radius, 1000, 0, 0
+        #         )
+        #         ball.nx = max(ball.nx, ball.radius + 1)
+        #     # real reflections
+        #     ball.angle = math.pi - ball.angle
+        # if abs(50 - ball.ny) > 50 - ball.radius:
+        #     # vertical
+        #     if ball.ny > 50:
+        #         ball.nx, ball.ny = calc_snap_pos(
+        #             ball.angle, ball.nx, ball.ny, ball.radius, 0, 0, 100
+        #         )
+        #         ball.ny = min(ball.ny, 99 - ball.radius)
+        #     else:
+        #         ball.nx, ball.ny = calc_snap_pos(
+        #             ball.angle, ball.nx, ball.ny, -ball.radius, 0, 0, 0
+        #         )
+        #         ball.ny = max(ball.ny, ball.radius + 1)
 
+        #     # real reflections
+        #     ball.angle = -ball.angle
     tick += 1
 
 
