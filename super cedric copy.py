@@ -151,6 +151,7 @@ prediction = plt.Circle([0, 0], 0, color="green", fill=True, clip_on=False)
 prediction.set_radius(2)
 ax.add_artist(prediction)
 
+
 # main
 def animate(_):
     global tick
@@ -190,6 +191,37 @@ def animate(_):
             ball.nx, ball.ny = pred_x, pred_y
             ball.angle = rebound
             ball.delay_log = True
+
+        # # ball hits borders
+        # if abs(50 - ball.nx) > 50 - ball.radius:
+        #     # horizontal
+        #     if ball.nx > 50:
+        #         ball.nx, ball.ny = calc_snap_pos(
+        #             ball.angle, ball.nx, ball.ny, -ball.radius, 1000, 100, 0
+        #         )
+        #         ball.nx = min(ball.nx, 99 - ball.radius)
+        #     else:
+        #         ball.nx, ball.ny = calc_snap_pos(
+        #             ball.angle, ball.nx, ball.ny, ball.radius, 1000, 0, 0
+        #         )
+        #         ball.nx = max(ball.nx, ball.radius + 1)
+        #     # real reflections
+        #     ball.angle = math.pi - ball.angle
+        # if abs(50 - ball.ny) > 50 - ball.radius:
+        #     # vertical
+        #     if ball.ny > 50:
+        #         ball.nx, ball.ny = calc_snap_pos(
+        #             ball.angle, ball.nx, ball.ny, ball.radius, 0, 0, 100
+        #         )
+        #         ball.ny = min(ball.ny, 99 - ball.radius)
+        #     else:
+        #         ball.nx, ball.ny = calc_snap_pos(
+        #             ball.angle, ball.nx, ball.ny, -ball.radius, 0, 0, 0
+        #         )
+        #         ball.ny = max(ball.ny, ball.radius + 1)
+
+        #     # real reflections
+        #     ball.angle = -ball.angle
     tick += 1
 
 
