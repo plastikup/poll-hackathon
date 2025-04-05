@@ -9,6 +9,8 @@ tick = 0
 DEFAULT_RADIUS = 1
 DEFAULT_VEL = 2
 DEFAULT_ANGLE = math.pi / 6
+DEFAULT_XPOS = 50
+DEFAULT_YPOS = 50
 
 
 # figure setup
@@ -20,24 +22,27 @@ ax.set_ylim(0, 100)
 ax.set_yticks([])
 ax.set_aspect("equal")
 
-button_ax = fig.add_axes([0.8, 0.02, 0.15, 0.05])
+button_ax = fig.add_axes([0.775, 0.1, 0.15, 0.05])
 button = Button(button_ax, "Start", color="0.9", hovercolor="0.8")
 
-# nballs_ax = fig.add_axes([0.8, 0.85, 0.15, 0.05])
-# nballs_slider = Slider(nballs_ax, "Radius", 1, 10, valinit=1, valstep=1)
-
-radius_ax = fig.add_axes([0.8, 0.85, 0.15, 0.05])
+radius_ax = fig.add_axes([0.775, 0.85, 0.15, 0.05])
 radius_slider = Slider(
     radius_ax, "Radius", 0.5, 10, valinit=DEFAULT_RADIUS, valstep=0.5
 )
 
-velocity_ax = fig.add_axes([0.8, 0.75, 0.15, 0.05])
+velocity_ax = fig.add_axes([0.775, 0.75, 0.15, 0.05])
 velocity_slider = Slider(
     velocity_ax, "Velocity", 0.1, 5, valinit=DEFAULT_VEL, valstep=0.1
 )
 
-angle_ax = fig.add_axes([0.8, 0.65, 0.15, 0.05])
+angle_ax = fig.add_axes([0.775, 0.65, 0.15, 0.05])
 angle_slider = Slider(angle_ax, "Angle (rad)", 0, 2 * math.pi, valinit=DEFAULT_ANGLE)
+
+xpos_ax = fig.add_axes([0.775, 0.55, 0.15, 0.05])
+xpos_slider = Slider(xpos_ax, "X position", 0, 100, valinit=DEFAULT_XPOS)
+
+ypos_ax = fig.add_axes([0.775, 0.45, 0.15, 0.05])
+ypos_slider = Slider(ypos_ax, "Y position", 0, 100, valinit=DEFAULT_YPOS)
 
 sack_of_balls = []
 
@@ -49,11 +54,13 @@ ani = None
 ball_radius = DEFAULT_RADIUS
 ball_velocity = DEFAULT_VEL
 ball_angle = DEFAULT_ANGLE
+ball_xpos = DEFAULT_XPOS
+ball_ypos = DEFAULT_YPOS
 
 
 # define balls yay
 class Ball:
-    def __init__(self, x, y, r, v, a):
+    def __init__(self, x, y, r, v, a, color):
         x = min(max(x, r), 100 - r)
         y = min(max(y, r), 100 - r)
 
@@ -64,68 +71,63 @@ class Ball:
         self.nx = x
         self.ny = y
 
-        self.b = plt.Circle([x, y], 0, color="black", fill=True, clip_on=False)
+        self.b = plt.Circle([x, y], 0, color=color, fill=True, clip_on=False)
         self.b.set_radius(r)
         ax.add_artist(self.b)
 
     def remove(self):
         self.b.remove()
 
-
-sack_of_balls = [
-    Ball(95, 1, 5, 1, math.pi / 2.2),
-    Ball(80, 20, 5, 2, math.pi),
-    Ball(40, 1, 5, 2, math.pi / 1.5),
-    Ball(0, 0, 10, 1, math.pi / 4),
-    Ball(95, 1, 5, 1, math.pi / 2.2),
-    Ball(80, 20, 5, 2, math.pi),
-    Ball(40, 1, 5, 2, math.pi / 1.5),
-    Ball(0, 0, 10, 1, math.pi / 4),
-    Ball(95, 1, 5, 1, math.pi / 2.2),
-    Ball(80, 20, 5, 2, math.pi),
-    Ball(40, 1, 5, 2, math.pi / 1.5),
-    Ball(0, 0, 10, 1, math.pi / 4),
-    Ball(95, 1, 5, 1, math.pi / 2.2),
-    Ball(80, 20, 5, 2, math.pi),
-    Ball(40, 1, 5, 2, math.pi / 1.5),
-    Ball(0, 0, 10, 1, math.pi / 4),
-    Ball(95, 1, 5, 1, math.pi / 2.2),
-    Ball(80, 20, 5, 2, math.pi),
-    Ball(40, 1, 5, 2, math.pi / 1.5),
-    Ball(0, 0, 10, 1, math.pi / 4),
-    Ball(95, 1, 5, 1, math.pi / 2.2),
-    Ball(80, 20, 5, 2, math.pi),
-    Ball(40, 1, 5, 2, math.pi / 1.5),
-    Ball(0, 0, 10, 1, math.pi / 4),
-    Ball(95, 1, 5, 1, math.pi / 2.2),
-    Ball(80, 20, 5, 2, math.pi),
-    Ball(40, 1, 5, 2, math.pi / 1.5),
-    Ball(0, 0, 10, 1, math.pi / 4),
-    Ball(95, 1, 5, 1, math.pi / 2.2),
-    Ball(80, 20, 5, 2, math.pi),
-    Ball(40, 1, 5, 2, math.pi / 1.5),
-    Ball(0, 0, 10, 1, math.pi / 4),
-    Ball(95, 1, 5, 1, math.pi / 2.2),
-    Ball(80, 20, 5, 2, math.pi),
-    Ball(40, 1, 5, 2, math.pi / 1.5),
-    Ball(0, 0, 10, 1, math.pi / 4),
-    Ball(95, 1, 5, 1, math.pi / 2.2),
-    Ball(80, 20, 5, 2, math.pi),
-    Ball(40, 1, 5, 2, math.pi / 1.5),
-    Ball(0, 0, 10, 1, math.pi / 4),
-    Ball(95, 1, 5, 1, math.pi / 2.2),
-    Ball(80, 20, 5, 2, math.pi),
-    Ball(40, 1, 5, 2, math.pi / 1.5),
-    Ball(0, 0, 10, 1, math.pi / 4),
-    Ball(95, 1, 5, 1, math.pi / 2.2),
-    Ball(80, 20, 5, 2, math.pi),
-    Ball(40, 1, 5, 2, math.pi / 1.5),
-    Ball(0, 0, 10, 1, math.pi / 4),
-]
-
-# define balls trails
-trails = []
-scat = ax.scatter([], [], s=10)
+# sack_of_balls = [
+#     Ball(95, 1, 5, 1, math.pi / 2.2),
+#     Ball(80, 20, 5, 2, math.pi),
+#     Ball(40, 1, 5, 2, math.pi / 1.5),
+#     Ball(0, 0, 10, 1, math.pi / 4),
+#     Ball(95, 1, 5, 1, math.pi / 2.2),
+#     Ball(80, 20, 5, 2, math.pi),
+#     Ball(40, 1, 5, 2, math.pi / 1.5),
+#     Ball(0, 0, 10, 1, math.pi / 4),
+#     Ball(95, 1, 5, 1, math.pi / 2.2),
+#     Ball(80, 20, 5, 2, math.pi),
+#     Ball(40, 1, 5, 2, math.pi / 1.5),
+#     Ball(0, 0, 10, 1, math.pi / 4),
+#     Ball(95, 1, 5, 1, math.pi / 2.2),
+#     Ball(80, 20, 5, 2, math.pi),
+#     Ball(40, 1, 5, 2, math.pi / 1.5),
+#     Ball(0, 0, 10, 1, math.pi / 4),
+#     Ball(95, 1, 5, 1, math.pi / 2.2),
+#     Ball(80, 20, 5, 2, math.pi),
+#     Ball(40, 1, 5, 2, math.pi / 1.5),
+#     Ball(0, 0, 10, 1, math.pi / 4),
+#     Ball(95, 1, 5, 1, math.pi / 2.2),
+#     Ball(80, 20, 5, 2, math.pi),
+#     Ball(40, 1, 5, 2, math.pi / 1.5),
+#     Ball(0, 0, 10, 1, math.pi / 4),
+#     Ball(95, 1, 5, 1, math.pi / 2.2),
+#     Ball(80, 20, 5, 2, math.pi),
+#     Ball(40, 1, 5, 2, math.pi / 1.5),
+#     Ball(0, 0, 10, 1, math.pi / 4),
+#     Ball(95, 1, 5, 1, math.pi / 2.2),
+#     Ball(80, 20, 5, 2, math.pi),
+#     Ball(40, 1, 5, 2, math.pi / 1.5),
+#     Ball(0, 0, 10, 1, math.pi / 4),
+#     Ball(95, 1, 5, 1, math.pi / 2.2),
+#     Ball(80, 20, 5, 2, math.pi),
+#     Ball(40, 1, 5, 2, math.pi / 1.5),
+#     Ball(0, 0, 10, 1, math.pi / 4),
+#     Ball(95, 1, 5, 1, math.pi / 2.2),
+#     Ball(80, 20, 5, 2, math.pi),
+#     Ball(40, 1, 5, 2, math.pi / 1.5),
+#     Ball(0, 0, 10, 1, math.pi / 4),
+#     Ball(95, 1, 5, 1, math.pi / 2.2),
+#     Ball(80, 20, 5, 2, math.pi),
+#     Ball(40, 1, 5, 2, math.pi / 1.5),
+#     Ball(0, 0, 10, 1, math.pi / 4),
+#     Ball(95, 1, 5, 1, math.pi / 2.2),
+#     Ball(80, 20, 5, 2, math.pi),
+#     Ball(40, 1, 5, 2, math.pi / 1.5),
+#     Ball(0, 0, 10, 1, math.pi / 4),
+# ]
 
 
 # calculate the snap position between two lines while snapping with a given radius
@@ -227,8 +229,9 @@ def start(event):
     for ball in sack_of_balls:
         ball.remove()
 
-    sack_of_balls = [Ball(50, 50, ball_radius, ball_velocity, ball_angle)]
-    print(ball_velocity)
+    vis_ball.b.set_visible(False)
+
+    sack_of_balls = [Ball(ball_xpos, ball_ypos, ball_radius, ball_velocity, ball_angle, "black")]
     trails = []
 
     ani = animation.FuncAnimation(
@@ -247,15 +250,25 @@ def update(event):
     global ball_radius
     global ball_velocity
     global ball_angle
+    global ball_xpos
+    global ball_ypos
+    global vis_ball
 
+    vis_ball.remove()
     ball_radius = radius_slider.val
     ball_velocity = velocity_slider.val
     ball_angle = angle_slider.val
+    ball_xpos = xpos_slider.val
+    ball_ypos = ypos_slider.val
+    vis_ball = Ball(ball_xpos, ball_ypos, ball_radius, ball_velocity, ball_angle, "red")
 
+vis_ball = Ball(DEFAULT_XPOS, DEFAULT_YPOS, DEFAULT_RADIUS, DEFAULT_VEL, DEFAULT_ANGLE, "red")
 
 button.on_clicked(start)
 radius_slider.on_changed(update)
 velocity_slider.on_changed(update)
 angle_slider.on_changed(update)
+xpos_slider.on_changed(update)
+ypos_slider.on_changed(update)
 
 plt.show()
