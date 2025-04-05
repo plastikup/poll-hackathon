@@ -2,6 +2,7 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+from matplotlib.lines import Line2D
 
 from matplotlib.widgets import Button, Slider
 
@@ -207,6 +208,8 @@ def start(event):
         ball.remove()
 
     vis_ball.b.set_visible(False)
+    pred_line.set_visible(False)
+
 
     sack_of_balls = [
         Ball(ball_xpos, ball_ypos, ball_radius, ball_velocity, ball_angle, "black")
@@ -245,7 +248,19 @@ def update(event):
     ball_xpos = xpos_slider.val
     ball_ypos = ypos_slider.val
     vis_ball = Ball(ball_xpos, ball_ypos, ball_radius, ball_velocity, ball_angle, "red")
+    put_pred_line(False)
 
+def put_pred_line(first):
+    global pred_line
+
+    pred_pose = (ball_xpos + math.cos(ball_angle) * ball_velocity * ball_radius,
+                 ball_ypos + math.sin(ball_angle) * ball_velocity * ball_radius)
+    if (not first):
+        pred_line.remove()
+    pred_line = Line2D([ball_xpos, pred_pose[0]], [ball_ypos, pred_pose[1]],
+                       color="red", linewidth=ball_radius * 2,)
+
+    ax.add_artist(pred_line)
 
 def change_shape(event):
     global polygon
@@ -276,6 +291,8 @@ def change_shape(event):
 vis_ball = Ball(
     DEFAULT_XPOS, DEFAULT_YPOS, DEFAULT_RADIUS, DEFAULT_VEL, DEFAULT_ANGLE, "red"
 )
+pred_line = None
+put_pred_line(True)
 
 button.on_clicked(start)
 radius_slider.on_changed(update)
