@@ -53,6 +53,9 @@ xpos_slider = Slider(xpos_ax, "X position", 0, 100, valinit=DEFAULT_XPOS)
 ypos_ax = fig.add_axes([0.775, 0.45, 0.15, 0.05])
 ypos_slider = Slider(ypos_ax, "Y position", 0, 100, valinit=DEFAULT_YPOS)
 
+polygon_ax = fig.add_axes([0.775, 0.35, 0.15, 0.05])
+polygon_slider = Slider(polygon_ax, "Polygon", 3, 5, valinit=4, valstep=1)
+
 sack_of_balls = []
 
 # define balls trails
@@ -151,6 +154,7 @@ prediction = plt.Circle([0, 0], 0, color="green", fill=True, clip_on=False)
 prediction.set_radius(2)
 ax.add_artist(prediction)
 
+
 # main
 def animate(_):
     global tick
@@ -243,6 +247,32 @@ def update(event):
     vis_ball = Ball(ball_xpos, ball_ypos, ball_radius, ball_velocity, ball_angle, "red")
 
 
+def change_shape(event):
+    global polygon
+
+    polygon = {
+        3: [(50.0, 100.0), (6.698729810778069, 25.0), (93.30127018922192, 25.0)],
+        4: [
+            (85.35533905932738, 85.35533905932738),
+            (14.64466094067263, 85.35533905932738),
+            (14.644660940672615, 14.64466094067263),
+            (85.35533905932738, 14.644660940672615),
+        ],
+        5: [
+            (50.0, 100.0),
+            (2.447174185242325, 65.45084971874738),
+            (19.09830056250527, 11.112360400844446),
+            (80.90169943749473, 11.11236040084443),
+            (97.55282581475768, 65.45084971874736),
+        ],
+    }[polygon_slider.val]
+    ax.plot(
+        list(map(lambda e: e[0], polygon + [polygon[0]])),
+        list(map(lambda e: e[1], polygon + [polygon[0]])),
+        "black",
+    )
+
+
 vis_ball = Ball(
     DEFAULT_XPOS, DEFAULT_YPOS, DEFAULT_RADIUS, DEFAULT_VEL, DEFAULT_ANGLE, "red"
 )
@@ -253,5 +283,6 @@ velocity_slider.on_changed(update)
 angle_slider.on_changed(update)
 xpos_slider.on_changed(update)
 ypos_slider.on_changed(update)
+polygon_slider.on_changed(change_shape)
 
 plt.show()
